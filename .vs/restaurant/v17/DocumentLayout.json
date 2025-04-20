@@ -1,0 +1,133 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|d:\\2ing\\sem2\\tp .net\\project\\restaurant\\restaurant\\models\\repository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|solutionrelative:restaurant\\models\\repository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|d:\\2ing\\sem2\\tp .net\\project\\restaurant\\restaurant\\controllers\\ingredientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|solutionrelative:restaurant\\controllers\\ingredientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|d:\\2ing\\sem2\\tp .net\\project\\restaurant\\restaurant\\views\\ingredient\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|solutionrelative:restaurant\\views\\ingredient\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|d:\\2ing\\sem2\\tp .net\\project\\restaurant\\restaurant\\views\\ingredient\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|solutionrelative:restaurant\\views\\ingredient\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|d:\\2ing\\sem2\\tp .net\\project\\restaurant\\restaurant\\models\\ingredient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|solutionrelative:restaurant\\models\\ingredient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|d:\\2ing\\sem2\\tp .net\\project\\restaurant\\restaurant\\models\\productingredient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|solutionrelative:restaurant\\models\\productingredient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|d:\\2ing\\sem2\\tp .net\\project\\restaurant\\restaurant\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F28BBDF-932A-45F8-9442-90647BE4C62D}|restaurant\\restaurant.csproj|solutionrelative:restaurant\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Views\\Ingredient\\Details.cshtml",
+              "RelativeDocumentMoniker": "restaurant\\Views\\Ingredient\\Details.cshtml",
+              "ToolTip": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Views\\Ingredient\\Details.cshtml",
+              "RelativeToolTip": "restaurant\\Views\\Ingredient\\Details.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-20T00:31:50.542Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ProductIngredient.cs",
+              "DocumentMoniker": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Models\\ProductIngredient.cs",
+              "RelativeDocumentMoniker": "restaurant\\Models\\ProductIngredient.cs",
+              "ToolTip": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Models\\ProductIngredient.cs",
+              "RelativeToolTip": "restaurant\\Models\\ProductIngredient.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-20T00:27:03.727Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Ingredient.cs",
+              "DocumentMoniker": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Models\\Ingredient.cs",
+              "RelativeDocumentMoniker": "restaurant\\Models\\Ingredient.cs",
+              "ToolTip": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Models\\Ingredient.cs",
+              "RelativeToolTip": "restaurant\\Models\\Ingredient.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-20T00:26:44.916Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Views\\Ingredient\\Index.cshtml",
+              "RelativeDocumentMoniker": "restaurant\\Views\\Ingredient\\Index.cshtml",
+              "ToolTip": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Views\\Ingredient\\Index.cshtml",
+              "RelativeToolTip": "restaurant\\Views\\Ingredient\\Index.cshtml",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA4AAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-20T00:11:23.979Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Repository.cs",
+              "DocumentMoniker": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Models\\Repository.cs",
+              "RelativeDocumentMoniker": "restaurant\\Models\\Repository.cs",
+              "ToolTip": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Models\\Repository.cs",
+              "RelativeToolTip": "restaurant\\Models\\Repository.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAowCgAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-19T23:05:11.266Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Program.cs",
+              "RelativeDocumentMoniker": "restaurant\\Program.cs",
+              "ToolTip": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Program.cs",
+              "RelativeToolTip": "restaurant\\Program.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAACgAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-19T23:03:14.629Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "IngredientController.cs",
+              "DocumentMoniker": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Controllers\\IngredientController.cs",
+              "RelativeDocumentMoniker": "restaurant\\Controllers\\IngredientController.cs",
+              "ToolTip": "D:\\2ing\\Sem2\\Tp .Net\\Project\\restaurant\\restaurant\\Controllers\\IngredientController.cs",
+              "RelativeToolTip": "restaurant\\Controllers\\IngredientController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAsAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-19T22:57:48.947Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
