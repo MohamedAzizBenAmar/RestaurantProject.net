@@ -1,7 +1,11 @@
 ﻿namespace restaurant.Models
 {
-    public class Order
+    public class Order //domain model 
     {
+        public Order()
+        {
+            OrderItems = new List<OrderItem>();
+        }
         public int OrderId { get; set; }
         public DateTime OrderDate { get; set; }
         public string? UserId { get; set; }

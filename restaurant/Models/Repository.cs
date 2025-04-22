@@ -5,15 +5,17 @@ using restaurant.Data;
 
 namespace restaurant.Models
 {
-    public class Repository<T> : IRepository<T> where T:class
+    public class Repository<T> : IRepository<T> where T : class
     {
         protected ApplicationDbContext _context { get; set; }
         private DbSet<T> _dbSet { get; set; }
+
         public Repository(ApplicationDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();
         }
+
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
