@@ -1,58 +1,112 @@
 ﻿@model IEnumerable<Product>
-
 @{
-    ViewBag.Title = "Menu Items ";
+    ViewBag.Title = "Menu Items";
 }
-@functions {
-    string GetDeleteModalId(Product prod)
-    {
-        return "#deleteModal" + prod.ProductId;
-    }
-
-    string GetModalId(Product prod)
-    {
-        return "deleteModal" + prod.ProductId;
-    }
-
+@section Styles {
+        <style>
+            #searchResults {
+                min-height: 200px;
+            }
+        </style>
 }
 
 <h2>Menu Items</h2>
-<a asp-action="AddEdit" asp-controller="Product" class="btn btn-primary">Create New Item</a>
+<a asp-action="AddEdit" asp-controller="Product" class="btn btn-primary mb-3">Create New Item</a>
 
-<div class="row">
-    @foreach(Product prod in Model)
-    {
+<div class="mb-4">
+    <div class="row">
         <div class="col-md-4">
-            <form asp-action="delete" asp-controller="product" method="post">
-                <input type="hidden" name="id" value="@prod.ProductId" />
-                <div class="card" style="width: 18rem">
-                    <img src="@Url.Content("~/images/"+ prod?.ImageUrl)" class="card-img-top fixed-image-height" alt="@prod.Description" />
-                </div>
-                <div class="card-body">
-                     <h5 class="card-title">@prod.Name</h5>
-                     <p class="card-text">@prod.Description</p>
-                     <p class="card-text">@prod.Price.ToString("C")</p>
-                     <p class="card-text">Quantity In Stock: @prod.Stock</p>
-                     <a class="btn btn-info" asp-controller="Product" asp-action="AddEdit" asp-route-id="@prod.ProductId"><i class="bi bi-pencil-fill">Edit</i></a> 
-                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="@GetDeleteModalId(prod)">
-                        <i class="bi bi-trash">Delete</i>
-                     </button>
-                     <div class="modal fade" id="@GetModalId(prod)" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Are you sure you want to delete @prod.Name?</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </div>
-                            </div>
-                         </div>
-                      </div>
-                 </div>
-            </form>
+            <input type="text" id="searchName" class="form-control" placeholder="Search by name" />
         </div>
-    }
+        <div class="col-md-3">
+            <select id="categoryId" class="form-control">
+                <option value="">All Categories</option>
+                @foreach (Category category in ViewBag.Categories)
+                {
+                        <option value="@category.CategoryId">@category.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="ingredientId" class="form-control">
+                <option value="">All Ingredients</option>
+                @foreach (Ingredient ingredient in ViewBag.Ingredients)
+                {
+                        <option value="@ingredient.IngredientId">@ingredient.Name</option>
+                }
+            </select>
+        </div>
+    </div>
 </div>
+
+<div id="searchResults">
+    @await Html.PartialAsync("_ProductList", Model)
+</div>
+
+<!-- Modals for each product -->
+@foreach (Product prod in Model)
+{
+        <div class="modal fade" id="deleteModal@(prod.ProductId)" tabindex="-1" aria-labelledby="deleteModalLabel@(prod.ProductId)" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="deleteModalLabel@(prod.ProductId)">Are you sure you want to delete @prod.Name?</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form asp-action="Delete" asp-controller="Product" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@prod.ProductId" />
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+}
+
+@section Scripts {
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                function performSearch() {
+                    var searchName = $('#searchName').val();
+                    var categoryId = $('#categoryId').val();
+                    var ingredientId = $('#ingredientId').val();
+
+                    $.ajax({
+                        url: '@Url.Action("Search", "Product")',
+                        type: 'GET',
+                        data: {
+                            searchName: searchName,
+                            categoryId: categoryId,
+                            ingredientId: ingredientId
+                        },
+                        success: function (data) {
+                            $('#searchResults').html(data);
+                            // Rebind modal events after AJAX update
+                            $('.delete-btn').on('click', function () {
+                                var modalId = $(this).data('bs-target');
+                                $(modalId).modal('show');
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('AJAX error:', error);
+                            $('#searchResults').html('<p>Error loading products.</p>');
+                        }
+                    });
+                }
+
+                $('#searchName').on('input', function () {
+                    performSearch();
+                });
+
+                $('#categoryId, #ingredientId').on('change', function () {
+                    performSearch();
+                });
+
+                // Initial load
+                performSearch();
+            });
+        </script>
+}

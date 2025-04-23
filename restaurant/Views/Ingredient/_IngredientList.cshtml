@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Ingredient>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var ingredient in Model)
+            {
+                        <tr>
+                            <td>@ingredient.Name</td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm details-btn" data-id="@ingredient.IngredientId">Details</button>
+                                <button type="button" class="btn btn-info btn-sm edit-btn" data-id="@ingredient.IngredientId">Edit</button>
+                                <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="@ingredient.IngredientId" data-bs-toggle="modal" data-bs-target="#deleteIngredientModal">Delete</button>
+                            </td>
+                        </tr>
+            }
+        }
+        else
+        {
+                <tr>
+                    <td colspan="2">No ingredients found.</td>
+                </tr>
+        }
+    </tbody>
+</table>

@@ -1,6 +1,16 @@
-﻿namespace restaurant.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace restaurant.Models
 {
-    public class Order //domain model 
+    public enum OrderStatus
+    {
+        Pending,
+        Completed,
+        Canceled
+    }
+
+    public class Order
     {
         public Order()
         {
@@ -11,6 +21,7 @@
         public string? UserId { get; set; }
         public ApplicationUser User { get; set; }
         public decimal TotalAmount { get; set; }
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public ICollection<OrderItem> OrderItems { get; set; }
     }
 }

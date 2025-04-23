@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using restaurant.Data;
 using restaurant.Models;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace restaurant.Controllers
 {
@@ -25,16 +27,11 @@ namespace restaurant.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            //ViewBag.Products = await _products.GetAllAsync();
-
-            //Retrieve or create an OrderViewModel from session or other state management
             var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel
             {
                 OrderItems = new List<OrderItemViewModel>(),
                 Products = await _products.GetAllAsync()
             };
-
-
             return View(model);
         }
 
@@ -48,20 +45,27 @@ namespace restaurant.Controllers
                 return NotFound();
             }
 
-            // Retrieve or create an OrderViewModel from session or other state management
             var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel
             {
                 OrderItems = new List<OrderItemViewModel>(),
                 Products = await _products.GetAllAsync()
             };
 
-            // Check if the product is already in the order
+            // Calculate total quantity in cart for this product
             var existingItem = model.OrderItems.FirstOrDefault(oi => oi.ProductId == prodId);
+            var totalQuantity = (existingItem?.Quantity ?? 0) + prodQty;
 
-            // If the product is already in the order, update the quantity
+            // Validate stock
+            if (totalQuantity > product.Stock)
+            {
+                ModelState.AddModelError("", $"Cannot add {prodQty} of {product.Name}. Only {product.Stock} available in stock.");
+                model.Products = await _products.GetAllAsync(); // Refresh products for view
+                return View("Create", model);
+            }
+
             if (existingItem != null)
             {
-                existingItem.Quantity += prodQty;
+                existingItem.Quantity = totalQuantity;
             }
             else
             {
@@ -74,30 +78,85 @@ namespace restaurant.Controllers
                 });
             }
 
-            // Update the total amount
             model.TotalAmount = model.OrderItems.Sum(oi => oi.Price * oi.Quantity);
-
-            // Save updated OrderViewModel to session
             HttpContext.Session.Set("OrderViewModel", model);
-
-            // Redirect back to Create to show updated order items
-            return RedirectToAction("Create", model);
+            return RedirectToAction("Create");
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Cart()
         {
-
-            // Retrieve the OrderViewModel from session or other state management
             var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
-
             if (model == null || model.OrderItems.Count == 0)
             {
                 return RedirectToAction("Create");
             }
-
             return View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UpdateItem(int productId, int quantity)
+        {
+            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            if (model == null)
+            {
+                return RedirectToAction("Create");
+            }
+
+            var item = model.OrderItems.FirstOrDefault(oi => oi.ProductId == productId);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            // Validate stock
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            if (quantity > product.Stock)
+            {
+                ModelState.AddModelError("", $"Cannot update quantity of {item.ProductName} to {quantity}. Only {product.Stock} available in stock.");
+                return View("Cart", model);
+            }
+
+            if (quantity <= 0)
+            {
+                model.OrderItems.Remove(item);
+            }
+            else
+            {
+                item.Quantity = quantity;
+            }
+
+            model.TotalAmount = model.OrderItems.Sum(oi => oi.Price * oi.Quantity);
+            HttpContext.Session.Set("OrderViewModel", model);
+            return RedirectToAction("Cart");
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> DeleteItem(int productId)
+        {
+            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            if (model == null)
+            {
+                return RedirectToAction("Create");
+            }
+
+            var item = model.OrderItems.FirstOrDefault(oi => oi.ProductId == productId);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            model.OrderItems.Remove(item);
+            model.TotalAmount = model.OrderItems.Sum(oi => oi.Price * oi.Quantity);
+            HttpContext.Session.Set("OrderViewModel", model);
+            return RedirectToAction("Cart");
         }
 
         [HttpPost]
@@ -110,15 +169,14 @@ namespace restaurant.Controllers
                 return RedirectToAction("Create");
             }
 
-            // Create a new Order entity
             Order order = new Order
             {
                 OrderDate = DateTime.Now,
                 TotalAmount = model.TotalAmount,
-                UserId = _userManager.GetUserId(User)
+                UserId = _userManager.GetUserId(User),
+                Status = OrderStatus.Pending
             };
 
-            // Add OrderItems to the Order entity
             foreach (var item in model.OrderItems)
             {
                 order.OrderItems.Add(new OrderItem
@@ -127,15 +185,14 @@ namespace restaurant.Controllers
                     Quantity = item.Quantity,
                     Price = item.Price
                 });
+
+                var product = await _context.Products.FindAsync(item.ProductId);
+                product.Stock -= item.Quantity;
+                await _products.UpdateAsync(product);
             }
 
-            // Save the Order entity to the database
             await _orders.AddAsync(order);
-
-            // Clear the OrderViewModel from session or other state management
             HttpContext.Session.Remove("OrderViewModel");
-
-            // Redirect to the Order Confirmation page
             return RedirectToAction("ViewOrders");
         }
 
@@ -144,16 +201,42 @@ namespace restaurant.Controllers
         public async Task<IActionResult> ViewOrders()
         {
             var userId = _userManager.GetUserId(User);
-
             var userOrders = await _orders.GetAllByIdAsync(userId, "UserId", new QueryOptions<Order>
             {
                 Includes = "OrderItems.Product"
             });
-
             return View(userOrders);
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            var order = await _orders.GetByIdAsync(orderId, new QueryOptions<Order> { Includes = "OrderItems.Product" });
+            if (order == null || order.UserId != _userManager.GetUserId(User))
+            {
+                return NotFound();
+            }
 
+            if (order.Status != OrderStatus.Pending)
+            {
+                ModelState.AddModelError("", "Only pending orders can be canceled.");
+                return RedirectToAction("ViewOrders");
+            }
 
+            foreach (var item in order.OrderItems)
+            {
+                var product = await _context.Products.FindAsync(item.ProductId);
+                if (product != null)
+                {
+                    product.Stock += item.Quantity;
+                    await _products.UpdateAsync(product);
+                }
+            }
+
+            order.Status = OrderStatus.Canceled;
+            await _orders.UpdateAsync(order);
+            return RedirectToAction("ViewOrders");
+        }
     }
 }

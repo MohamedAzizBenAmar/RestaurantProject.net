@@ -1,26 +1,45 @@
-﻿
-@model OrderViewModel 
+﻿@model OrderViewModel
 @{
-        ViewBag.Title = "Create Order";
+    ViewBag.Title = "Create Order";
 }
-
 <h1>Create Order</h1>
 
-<div class="row">
-    @foreach (Product product in @Model.Products)
-    {
-        <div class="col-md-4">
-            <form asp-action="AddItem" method="post">
-                <div class="card" style="width: 18rem;">
-                    <img src="@Url.Content("~/images/" + product?.ImageUrl)" class="card-img-top fixed-image-height" alt="@product.Description">
-                    <div class="card-body">
-                        @product.Name - @product.Price.ToString("C")
-                        <input type="hidden" value="@product.ProductId" name="prodId" />
-                        <input type="number" name="prodQty" class="form-control" />
-                        <button class="btn btn-info" type="submit">Add</button>
-                    </div>
-                </div>
-            </form>
+@if (!ViewData.ModelState.IsValid)
+{
+        <div class="alert alert-danger" role="alert">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+                    <p>@error.ErrorMessage</p>
+        }
         </div>
+}
+
+<div class="row">
+    @foreach (var product in Model.Products)
+    {
+            <div class="col-md-4 mb-4">
+                <form asp-action="AddItem" method="post">
+                    <input type="hidden" name="prodId" value="@product.ProductId" />
+                    <div class="card" style="width: 18rem;">
+                        <img src="@Url.Content("~/images/" + product.ImageUrl)" class="card-img-top fixed-image-height" alt="@product.Description" />
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text">@product.Description</p>
+                            <p class="card-text">@product.Price.ToString("C")</p>
+                            <p class="card-text">@(product.Stock > 0 ? "In Stock" : "Out of Stock")</p>
+                        @if (product.Stock > 0)
+                        {
+                                    <input type="number" min="1" name="prodQty" value="1" class="form-control mb-2" style="width: 100px;" />
+                                    <button type="submit" class="btn btn-primary">Add to Order</button>
+                        }
+                        else
+                        {
+                                    <button type="submit" class="btn btn-primary" disabled>Add to Order</button>
+                        }
+                        </div>
+                    </div>
+                </form>
+            </div>
     }
 </div>
+
