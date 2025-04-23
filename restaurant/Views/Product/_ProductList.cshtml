@@ -16,11 +16,9 @@ else
                                 <h5 class="card-title">@prod.Name</h5>
                                 <p class="card-text">@prod.Description</p>
                                 <p class="card-text">@prod.Price.ToString("C")</p>
-                                <p class="card-text">@(prod.Stock > 0 ? "In Stock" : "Out of Stock")</p>
+                                <p class="card-text">Stock: @prod.Stock</p>
                                 <a class="btn btn-info" asp-controller="Product" asp-action="AddEdit" asp-route-id="@prod.ProductId"><i class="bi bi-pencil-fill">Edit</i></a>
-                                <button type="button" class="btn btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal@(prod.ProductId)">
-                                    <i class="bi bi-trash">Delete</i>
-                                </button>
+                                <button type="button" class="btn btn-danger delete-btn" data-id="@prod.ProductId"><i class="bi bi-trash">Delete</i></button>
                             </div>
                         </div>
                     </div>

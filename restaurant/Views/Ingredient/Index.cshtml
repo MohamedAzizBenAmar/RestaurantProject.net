@@ -111,7 +111,7 @@
             <form id="deleteIngredientForm" asp-action="Delete" asp-controller="Ingredient" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
-                    <input type="hidden" id="deleteIngredientId" name="IngredientId" />
+                    <input type="hidden" id="deleteIngredientId" name="id" />
                     <p>Are you sure you want to delete this ingredient?</p>
                     <span class="text-danger" id="deleteError"></span>
                 </div>
@@ -154,9 +154,13 @@
                     $('#successAlert, #errorAlert').fadeOut('slow');
                 }, 3000);
 
-                // Show global error message
-                function showGlobalError(message) {
-                    $('#globalError').text(message).show();
+                // Show global message (error or success)
+                function showGlobalMessage(message, isSuccess = false) {
+                    $('#globalError')
+                        .removeClass('alert-danger alert-success')
+                        .addClass(isSuccess ? 'alert-success' : 'alert-danger')
+                        .text(message)
+                        .show();
                     setTimeout(function () {
                         $('#globalError').fadeOut('slow');
                     }, 3000);
@@ -180,7 +184,7 @@
                         },
                         error: function (xhr, status, error) {
                             console.error('Search AJAX error:', status, error, 'Status:', xhr.status, 'Response:', xhr.responseText);
-                            showGlobalError('Error loading ingredients: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
+                            showGlobalMessage('Error loading ingredients: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
                             $('#ingredientList').html('<p>Error loading ingredients.</p>');
                         }
                     });
@@ -216,12 +220,13 @@
                         type: 'POST',
                         data: $(this).serialize(),
                         success: function (response) {
-                            console.log('Create AJAX response:', response);
+                            console.log('Create AJAX response:', JSON.stringify(response, null, 2));
                             if (response.success) {
                                 $('#createIngredientModal').modal('hide');
                                 $('#createIngredientForm')[0].reset();
                                 $('#createIngredientNameError').text('');
                                 performSearch(true);
+                                showGlobalMessage('Ingredient added successfully.', true);
                             } else {
                                 $('#createIngredientNameError').text(response.errors ? response.errors.join(', ') : 'Failed to create ingredient.');
                             }
@@ -238,7 +243,7 @@
                     var ingredientId = $(this).data('id');
                     console.log('Edit button clicked for ingredient ID:', ingredientId);
                     if (!ingredientId || isNaN(ingredientId)) {
-                        showGlobalError('Invalid ingredient ID.');
+                        showGlobalMessage('Invalid ingredient ID.');
                         return;
                     }
                     $.ajax({
@@ -253,12 +258,12 @@
                                 $('#editIngredientNameError').text('');
                                 $('#editIngredientModal').modal('show');
                             } else {
-                                showGlobalError(response && response.message ? response.message : 'Failed to load ingredient data.');
+                                showGlobalMessage(response && response.message ? response.message : 'Failed to load ingredient data.');
                             }
                         },
                         error: function (xhr, status, error) {
                             console.error('Edit GET AJAX error:', status, error, xhr.status, xhr.responseText);
-                            showGlobalError('Error loading ingredient data: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
+                            showGlobalMessage('Error loading ingredient data: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
                         }
                     });
                 });
@@ -282,6 +287,7 @@
                                 $('#editIngredientForm')[0].reset();
                                 $('#editIngredientNameError').text('');
                                 performSearch(true);
+                                showGlobalMessage('Ingredient updated successfully.', true);
                             } else {
                                 $('#editIngredientNameError').text(response && response.message ? response.message : (response && response.errors ? response.errors.join(', ') : 'Failed to save ingredient.'));
                             }
@@ -298,26 +304,26 @@
                     var ingredientId = $(this).data('id');
                     console.log('Delete button clicked for ingredient ID:', ingredientId);
                     if (!ingredientId || isNaN(ingredientId)) {
-                        showGlobalError('Invalid ingredient ID.');
+                        showGlobalMessage('Invalid ingredient ID.');
                         return;
                     }
                     $.ajax({
-                        url: '@Url.Action("Delete", "Ingredient")',
+                        url: '@Url.Action("DeleteCheck", "Ingredient")',
                         type: 'GET',
                         data: { id: ingredientId },
                         success: function (response) {
-                            console.log('Delete GET response:', JSON.stringify(response, null, 2));
+                            console.log('DeleteCheck GET response:', JSON.stringify(response, null, 2));
                             if (response && response.success && response.ingredient && response.ingredient.ingredientId) {
                                 $('#deleteIngredientId').val(response.ingredient.ingredientId);
                                 $('#deleteError').text('');
                                 $('#deleteIngredientModal').modal('show');
                             } else {
-                                showGlobalError(response && response.message ? response.message : 'Failed to load ingredient data.');
+                                showGlobalMessage(response && response.message ? response.message : 'Failed to load ingredient data.');
                             }
                         },
                         error: function (xhr, status, error) {
-                            console.error('Delete GET AJAX error:', status, error, xhr.status, xhr.responseText);
-                            showGlobalError('Error loading ingredient data: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
+                            console.error('DeleteCheck GET AJAX error:', status, error, xhr.status, xhr.responseText);
+                            showGlobalMessage('Error loading ingredient data: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
                         }
                     });
                 });
@@ -341,6 +347,7 @@
                                 $('#deleteIngredientForm')[0].reset();
                                 $('#deleteError').text('');
                                 performSearch(true);
+                                showGlobalMessage('Ingredient deleted successfully.', true);
                             } else {
                                 $('#deleteError').text(response && response.message ? response.message : 'Failed to delete ingredient.');
                             }
@@ -357,7 +364,7 @@
                     var ingredientId = $(this).data('id');
                     console.log('Details button clicked for ingredient ID:', ingredientId);
                     if (!ingredientId || isNaN(ingredientId)) {
-                        showGlobalError('Invalid ingredient ID.');
+                        showGlobalMessage('Invalid ingredient ID.');
                         return;
                     }
                     $.ajax({
@@ -372,12 +379,12 @@
                                 $('#detailsError').text('');
                                 $('#detailsIngredientModal').modal('show');
                             } else {
-                                showGlobalError(response && response.message ? response.message : 'Failed to load ingredient data.');
+                                showGlobalMessage(response && response.message ? response.message : 'Failed to load ingredient data.');
                             }
                         },
                         error: function (xhr, status, error) {
                             console.error('Details GET AJAX error:', status, error, xhr.status, xhr.responseText);
-                            showGlobalError('Error loading ingredient data: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
+                            showGlobalMessage('Error loading ingredient data: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
                         }
                     });
                 });
