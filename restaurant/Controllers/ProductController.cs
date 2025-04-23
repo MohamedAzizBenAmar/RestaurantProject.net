@@ -58,24 +58,36 @@ namespace restaurant.Controllers
         [HttpGet]
         public async Task<IActionResult> Search(string searchName, int? categoryId, int? ingredientId)
         {
-            var productsList = await products.GetAllAsync();
-
-            if (!string.IsNullOrEmpty(searchName))
+            try
             {
-                productsList = productsList.Where(p => p.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase));
-            }
+                var queryOptions = new QueryOptions<Product>
+                {
+                    Includes = "Category,ProductIngredients.Ingredient"
+                };
+                var productsList = await products.GetAllAsync();
 
-            if (categoryId.HasValue)
+                if (!string.IsNullOrEmpty(searchName))
+                {
+                    productsList = productsList.Where(p => p.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (categoryId.HasValue)
+                {
+                    productsList = productsList.Where(p => p.CategoryId == categoryId.Value);
+                }
+
+                if (ingredientId.HasValue)
+                {
+                    productsList = productsList.Where(p => p.ProductIngredients.Any(pi => pi.IngredientId == ingredientId.Value));
+                }
+
+                return PartialView("_ProductList", productsList);
+            }
+            catch (Exception ex)
             {
-                productsList = productsList.Where(p => p.CategoryId == categoryId.Value);
+                Console.WriteLine($"Search error: {ex.Message}");
+                return StatusCode(500, "Error loading products.");
             }
-
-            if (ingredientId.HasValue)
-            {
-                productsList = productsList.Where(p => p.ProductIngredients.Any(pi => pi.IngredientId == ingredientId.Value));
-            }
-
-            return PartialView("_ProductList", productsList);
         }
 
         [HttpGet]
@@ -94,6 +106,11 @@ namespace restaurant.Controllers
                 {
                     Includes = "ProductIngredients.Ingredient, Category"
                 });
+                if (product == null)
+                {
+                    TempData["Error"] = "Product not found.";
+                    return RedirectToAction("Index");
+                }
                 ViewBag.Operation = "Edit";
                 return View(product);
             }
@@ -160,6 +177,7 @@ namespace restaurant.Controllers
                         product.ProductIngredients.Add(new ProductIngredient { IngredientId = id });
                     }
                     await products.AddAsync(product);
+                    TempData["Success"] = "Product added successfully.";
                     return RedirectToAction("Index", "Product");
                 }
                 else
@@ -183,7 +201,6 @@ namespace restaurant.Controllers
                     {
                         existingProduct.ImageUrl = product.ImageUrl;
                     }
-                    // Else, existingProduct.ImageUrl remains unchanged
 
                     // Update ingredients
                     existingProduct.ProductIngredients.Clear();
@@ -195,6 +212,7 @@ namespace restaurant.Controllers
                     try
                     {
                         await products.UpdateAsync(existingProduct);
+                        TempData["Success"] = "Product updated successfully.";
                     }
                     catch (Exception ex)
                     {
@@ -207,13 +225,54 @@ namespace restaurant.Controllers
             return View(product);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        [HttpGet]
+        public async Task<IActionResult> DeleteCheck(int id)
         {
             try
             {
-                var product = await products.GetByIdAsync(id, new QueryOptions<Product>());
-                if (product != null && !string.IsNullOrEmpty(product.ImageUrl) && product.ImageUrl != "https://via.placeholder.com/150")
+                var product = await products.GetByIdAsync(id, new QueryOptions<Product> { Includes = "orderItems" });
+                if (product == null)
+                {
+                    Console.WriteLine($"DeleteCheck GET: Product ID {id} not found");
+                    return Json(new { success = false, message = "Product not found." });
+                }
+                if (product.orderItems != null && product.orderItems.Any())
+                {
+                    Console.WriteLine($"DeleteCheck GET: Product ID {id} has linked order items");
+                    return Json(new { success = false, message = "Cannot delete product because it is linked to order items." });
+                }
+                Console.WriteLine($"DeleteCheck GET: Loaded product ID {id}, Name: {product.Name}");
+                return Json(new { success = true, product = new { productId = product.ProductId, name = product.Name } });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DeleteCheck GET error: {ex.Message}");
+                return Json(new { success = false, message = $"Error retrieving product: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete([Bind("id")] int id)
+        {
+            try
+            {
+                var product = await products.GetByIdAsync(id, new QueryOptions<Product> { Includes = "orderItems" });
+                if (product == null)
+                {
+                    Console.WriteLine($"Delete POST: Product ID {id} not found");
+                    TempData["Error"] = "Product not found.";
+                    return Json(new { success = false, message = "Product not found." });
+                }
+                if (product.orderItems != null && product.orderItems.Any())
+                {
+                    Console.WriteLine($"Delete POST: Product ID {id} has linked order items");
+                    TempData["Error"] = "Cannot delete product because it is linked to order items.";
+                    return Json(new { success = false, message = "Cannot delete product because it is linked to order items." });
+                }
+
+                // Delete image if exists
+                if (!string.IsNullOrEmpty(product.ImageUrl) && product.ImageUrl != "https://via.placeholder.com/150")
                 {
                     var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", product.ImageUrl);
                     if (System.IO.File.Exists(imagePath))
@@ -221,13 +280,17 @@ namespace restaurant.Controllers
                         System.IO.File.Delete(imagePath);
                     }
                 }
+
                 await products.DeleteAsync(id);
-                return RedirectToAction("Index");
+                Console.WriteLine($"Delete POST: Deleted product ID {id}");
+                TempData["Success"] = "Product deleted successfully.";
+                return Json(new { success = true });
             }
-            catch
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", "Product not found.");
-                return RedirectToAction("Index");
+                Console.WriteLine($"Delete POST error: {ex.Message}");
+                TempData["Error"] = $"Cannot delete product: {ex.Message}";
+                return Json(new { success = false, message = $"Error deleting product: {ex.Message}" });
             }
         }
     }

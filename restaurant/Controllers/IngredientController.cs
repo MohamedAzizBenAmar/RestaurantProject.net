@@ -70,6 +70,13 @@ namespace restaurant.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    var existingIngredient = (await _ingredients.GetAllAsync())
+                        .FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.OrdinalIgnoreCase));
+                    if (existingIngredient != null)
+                    {
+                        Console.WriteLine($"Create: Ingredient name '{ingredient.Name}' already exists");
+                        return Json(new { success = false, errors = new[] { "Ingredient name already exists." } });
+                    }
                     ingredient.ProductIngredients = new List<ProductIngredient>();
                     await _ingredients.AddAsync(ingredient);
                     Console.WriteLine($"Create: Added ingredient '{ingredient.Name}'");
@@ -187,24 +194,29 @@ namespace restaurant.Controllers
             }
         }
 
-        // GET: Ingredient/Delete
+        // GET: Ingredient/DeleteCheck
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteCheck(int id)
         {
             try
             {
                 var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient> { Includes = "ProductIngredients.Product" });
                 if (ingredient == null)
                 {
-                    Console.WriteLine($"Delete GET: Ingredient ID {id} not found");
+                    Console.WriteLine($"DeleteCheck GET: Ingredient ID {id} not found");
                     return Json(new { success = false, message = "Ingredient not found." });
                 }
-                Console.WriteLine($"Delete GET: Loaded ingredient ID {id}, Name: {ingredient.Name}");
+                if (ingredient.ProductIngredients != null && ingredient.ProductIngredients.Any())
+                {
+                    Console.WriteLine($"DeleteCheck GET: Ingredient ID {id} has linked products");
+                    return Json(new { success = false, message = "Cannot delete ingredient because it is linked to products." });
+                }
+                Console.WriteLine($"DeleteCheck GET: Loaded ingredient ID {id}, Name: {ingredient.Name}");
                 return Json(new { success = true, ingredient = new { ingredientId = ingredient.IngredientId, name = ingredient.Name } });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Delete GET error: {ex.Message}");
+                Console.WriteLine($"DeleteCheck GET error: {ex.Message}");
                 return Json(new { success = false, message = $"Error retrieving ingredient: {ex.Message}" });
             }
         }
@@ -212,25 +224,25 @@ namespace restaurant.Controllers
         // POST: Ingredient/Delete
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete([Bind("IngredientId")] Ingredient ingredient)
+        public async Task<IActionResult> Delete([Bind("id")] int id)
         {
             try
             {
-                var existingIngredient = await _ingredients.GetByIdAsync(ingredient.IngredientId, new QueryOptions<Ingredient> { Includes = "ProductIngredients.Product" });
+                var existingIngredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient> { Includes = "ProductIngredients.Product" });
                 if (existingIngredient == null)
                 {
-                    Console.WriteLine($"Delete POST: Ingredient ID {ingredient.IngredientId} not found");
+                    Console.WriteLine($"Delete POST: Ingredient ID {id} not found");
                     TempData["Error"] = "Ingredient not found.";
                     return Json(new { success = false, message = "Ingredient not found." });
                 }
                 if (existingIngredient.ProductIngredients != null && existingIngredient.ProductIngredients.Any())
                 {
-                    Console.WriteLine($"Delete POST: Ingredient ID {ingredient.IngredientId} has linked products");
+                    Console.WriteLine($"Delete POST: Ingredient ID {id} has linked products");
                     TempData["Error"] = "Cannot delete ingredient because it is linked to products.";
                     return Json(new { success = false, message = "Cannot delete ingredient because it is linked to products." });
                 }
-                await _ingredients.DeleteAsync(ingredient.IngredientId);
-                Console.WriteLine($"Delete POST: Deleted ingredient ID {ingredient.IngredientId}");
+                await _ingredients.DeleteAsync(id);
+                Console.WriteLine($"Delete POST: Deleted ingredient ID {id}");
                 TempData["Success"] = "Ingredient deleted successfully.";
                 return Json(new { success = true });
             }
