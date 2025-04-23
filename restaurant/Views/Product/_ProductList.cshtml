@@ -1,0 +1,29 @@
+﻿@model IEnumerable<Product>
+
+@if (!Model.Any())
+{
+        <p>No products found.</p>
+}
+else
+{
+        <div class="row">
+        @foreach (Product prod in Model)
+        {
+                    <div class="col-md-4 mb-4">
+                        <div class="card" style="width: 18rem">
+                            <img src="@Url.Content("~/images/" + prod?.ImageUrl)" class="card-img-top fixed-image-height" alt="@prod.Description" />
+                            <div class="card-body">
+                                <h5 class="card-title">@prod.Name</h5>
+                                <p class="card-text">@prod.Description</p>
+                                <p class="card-text">@prod.Price.ToString("C")</p>
+                                <p class="card-text">@(prod.Stock > 0 ? "In Stock" : "Out of Stock")</p>
+                                <a class="btn btn-info" asp-controller="Product" asp-action="AddEdit" asp-route-id="@prod.ProductId"><i class="bi bi-pencil-fill">Edit</i></a>
+                                <button type="button" class="btn btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal@(prod.ProductId)">
+                                    <i class="bi bi-trash">Delete</i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+        }
+        </div>
+}

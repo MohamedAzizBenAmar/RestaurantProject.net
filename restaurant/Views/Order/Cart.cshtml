@@ -1,37 +1,68 @@
 ﻿@model OrderViewModel
 <h1>My Cart</h1>
 
-<!--Form to finalize and create the order-->
-<form asp-action="PlaceOrder" method="post">
-    <h3>Order Items</h3>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < Model.OrderItems.Count; i++)
+@if (Model.OrderItems.Count == 0)
+{
+        <p>Your cart is empty.</p>
+        <a asp-action="Create" class="btn btn-primary">Continue Shopping</a>
+}
+else
+{
+    @if (!ViewData.ModelState.IsValid)
+    {
+                <div class="alert alert-danger" role="alert">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
             {
+                            <p>@error.ErrorMessage</p>
+            }
+                </div>
+    }
+
+        <h3>Order Items</h3>
+        <table class="table table-bordered">
+            <thead>
                 <tr>
-                    <td>@Model.OrderItems[i].ProductName</td>
-                    <td>@Model.OrderItems[i].Quantity</td>
-                    <td>@Model.OrderItems[i].Price</td>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                        <tr>
+                            <td>@item.ProductName</td>
+                            <td>
+                                <form asp-action="UpdateItem" method="post" class="d-inline">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control d-inline-block" style="width: 80px;" />
+                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                </form>
+                            </td>
+                            <td>@item.Price.ToString("C")</td>
+                            <td>@((item.Price * item.Quantity).ToString("C"))</td>
+                            <td>
+                                <form asp-action="DeleteItem" method="post" class="d-inline">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+            }
+                <tr>
+                    <td colspan="3" class="text-right fw-bold">Total:</td>
+                    <td class="bg-primary bg-gradient text-white fw-bold">@Model.TotalAmount.ToString("C")</td>
                     <td></td>
                 </tr>
-            }
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td class="bg-primary bg-gradient text-white fw-bold">@Model.TotalAmount.ToString("C")</td>
-            </tr>
-        </tbody>
-    </table>
-    <div class="form-group">
-        <input type="submit" value="Place Order" class="btn btn-primary" />
-    </div>
-</form>
+            </tbody>
+        </table>
+
+        <form asp-action="PlaceOrder" method="post">
+            <div class="form-group">
+                <input type="submit" value="Place Order" class="btn btn-primary" />
+                <a asp-action="Create" class="btn btn-secondary">Continue Shopping</a>
+            </div>
+        </form>
+}

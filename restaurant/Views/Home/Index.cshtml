@@ -1,8 +1,68 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Welcome to Our Restaurant";
+}
+@section Styles {
+        <style>
+            .hero-section {
+                background: url('/images/restaurant-bg.jpg') no-repeat center center;
+                background-size: cover;
+                color: white;
+                padding: 100px 0;
+                text-align: center;
+            }
+            .hero-section h1 {
+                font-size: 3.5rem;
+                font-weight: bold;
+            }
+            .hero-section p {
+                font-size: 1.5rem;
+            }
+            .fixed-image-height {
+                height: 200px;
+                object-fit: cover;
+                width: 100%;
+            }
+        </style>
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-section">
+    <div class="container">
+        <h1>Welcome to Our Restaurant</h1>
+        <p>Discover delicious meals crafted with fresh ingredients.</p>
+        <a asp-controller="Order" asp-action="Create" class="btn btn-primary btn-lg">Order Now</a>
+    </div>
 </div>
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Featured Dishes</h2>
+    @if (!Model.Any())
+    {
+            <p class="text-center">No featured dishes available at the moment.</p>
+    }
+    else
+    {
+            <div class="row">
+            @foreach (var product in Model.Take(3))
+            {
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="@Url.Content("~/images/" + product.ImageUrl)" class="card-img-top fixed-image-height" alt="@product.Name">
+                                <div class="card-body">
+                                    <h5 class="card-title">@product.Name</h5>
+                                    <p class="card-text">@product.Description</p>
+                                    <p class="card-text fw-bold">@product.Price.ToString("C")</p>
+                                    <a asp-controller="Order" asp-action="Create" class="btn btn-primary">Add to Order</a>
+                                </div>
+                            </div>
+                        </div>
+            }
+            </div>
+    }
+</div>
+
+@section Scripts {
+        <script>
+            // Add any JavaScript for interactivity if needed
+        </script>
+}

@@ -1,32 +1,45 @@
 ﻿@model IEnumerable<restaurant.Models.Order>
 @{
-        ViewData["Title"] = "My Orders";
+    ViewData["Title"] = "My Orders";
 }
+<h1>My Orders</h1>
 <table class="table table-bordered">
     <thead>
         <tr>
             <th>Order ID</th>
             <th>Order Date</th>
+            <th>Status</th>
             <th>Total Amount</th>
             <th>Order Items</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var order in Model)
         {
-            <tr>
-                <td>@order.OrderId</td>
-                <td>@order.OrderDate.ToString("MM/dd/yyyy")</td>
-                <td>@order.TotalAmount.ToString("C")</td>
-                <td>
-                    <ul>
+                <tr>
+                    <td>@order.OrderId</td>
+                    <td>@order.OrderDate.ToString("MM/dd/yyyy")</td>
+                    <td>@order.Status</td>
+                    <td>@order.TotalAmount.ToString("C")</td>
+                    <td>
+                        <ul>
                         @foreach (var item in order.OrderItems)
                         {
-                            <li>@item.Product.Name - @item.Quantity x @item.Price.ToString("C")</li>
+                                    <li>@item.Product.Name - @item.Quantity x @item.Price.ToString("C")</li>
                         }
-                    </ul>
-                </td>
-            </tr>
+                        </ul>
+                    </td>
+                    <td>
+                    @if (order.Status == OrderStatus.Pending)
+                    {
+                                <form asp-action="CancelOrder" method="post" class="d-inline">
+                                    <input type="hidden" name="orderId" value="@order.OrderId" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                                </form>
+                    }
+                    </td>
+                </tr>
         }
     </tbody>
 </table>
