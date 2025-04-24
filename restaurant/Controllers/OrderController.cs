@@ -41,7 +41,7 @@ namespace restaurant.Controllers
             ViewBag.Ingredients = await _ingredients.GetAllAsync();
             return View(model);
         }
-        [Authorize(Roles = "User")]
+        [Authorize]
 
         [HttpPost]
         public async Task<IActionResult> AddItem(int prodId, int prodQty)
@@ -124,8 +124,6 @@ namespace restaurant.Controllers
                 return StatusCode(500, "Error loading products.");
             }
         }
-        [Authorize]
-
         [HttpGet]
         public async Task<IActionResult> Cart()
         {
@@ -136,8 +134,6 @@ namespace restaurant.Controllers
             }
             return View(model);
         }
-        [Authorize]
-
         [HttpPost]
         public async Task<IActionResult> UpdateItem(int productId, int quantity)
         {
@@ -177,8 +173,6 @@ namespace restaurant.Controllers
             HttpContext.Session.Set("OrderViewModel", model);
             return RedirectToAction("Cart");
         }
-        [Authorize]
-
         [HttpPost]
         public async Task<IActionResult> DeleteItem(int productId)
         {
@@ -199,8 +193,6 @@ namespace restaurant.Controllers
             HttpContext.Session.Set("OrderViewModel", model);
             return RedirectToAction("Cart");
         }
-        [Authorize]
-
         [HttpPost]
         public async Task<IActionResult> PlaceOrder()
         {
@@ -236,7 +228,6 @@ namespace restaurant.Controllers
             HttpContext.Session.Remove("OrderViewModel");
             return RedirectToAction("ViewOrders");
         }
-        [Authorize]
 
         [HttpGet]
         public async Task<IActionResult> ViewOrders()
@@ -248,8 +239,6 @@ namespace restaurant.Controllers
             });
             return View(userOrders);
         }
-        [Authorize]
-
         [HttpPost]
         public async Task<IActionResult> CancelOrder(int orderId)
         {
