@@ -1,20 +1,64 @@
 ﻿@model IEnumerable<Product>
 @{
-    ViewData["Title"] = "Welcome to Gourmet Haven";
+    ViewData["Title"] = "Welcome to Mexicano";
 }
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/restaurant2-bg.jpg') no-repeat center center/cover;
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+    }
+
+    .dynamic-text {
+        color: var(--hero-text-color, #ff6b6b); /* Default coral color */
+        font-size: 3.5rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        transition: color 0.5s ease-in-out;
+    }
+
+    .hero-cta-buttons .btn {
+        transition: all 0.3s ease;
+    }
+
+        .hero-cta-buttons .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+    @@keyframes textSwitch {
+        0%, 100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        50% {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+
+    .dynamic-text span {
+        display: inline-block;
+        animation: textSwitch 12s infinite;
+    }
+</style>
 
 <div class="hero-section">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <h1 class="display-3 fw-bold mb-4">Artisanal Cuisine, Crafted with Passion</h1>
-                <p class="lead mb-5">Discover a symphony of flavors using the freshest local ingredients</p>
-                <div class="d-flex gap-3 justify-content-center">
-                    <a asp-controller="Order" asp-action="Create" class="btn btn-primary btn-lg px-4 py-2">
-                        <i class="bi bi-menu-up me-2"></i>View Our Menu
+            <div class="col-lg-10 text-center">
+                <h1 class="display-3 fw-bold mb-4">
+                    <span class="dynamic-text" id="dynamicHeading"></span>
+                </h1>
+                <p class="lead mb-5 text-light">Discover a symphony of flavors using the freshest local ingredients</p>
+                <div class="hero-cta-buttons d-flex gap-3 justify-content-center">
+                    <a asp-controller="Order" asp-action="Create" class="btn btn-primary btn-lg px-4 py-3">
+                        <i class="bi bi-menu-up me-2"></i>Explore Our Menu
                     </a>
-                    <a href="#featured" class="btn btn-outline-light btn-lg px-4 py-2">
-                        <i class="bi bi-arrow-down me-2"></i>Explore
+                    <a href="#featured" class="btn btn-outline-light btn-lg px-4 py-3">
+                        <i class="bi bi-stars me-2"></i>Today's Specials
                     </a>
                 </div>
             </div>
@@ -87,8 +131,50 @@
                 </ul>
             </div>
             <div class="col-lg-6">
-                <img src="/images/chef-preparing.jpg" alt="Chef preparing food" class="img-fluid rounded-lg shadow">
+                <img src="/images/chef.png" alt="Chef preparing food" class="img-fluid rounded-lg shadow">
             </div>
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        const messages = [
+            "Artisanal Cuisine, Crafted with Passion",
+            "Seasonal Flavors, Timeless Techniques",
+            "Where Tradition Meets Innovation",
+            "Elevating Everyday Dining"
+        ];
+
+        let currentIndex = 0;
+        const headingElement = document.getElementById('dynamicHeading');
+
+        function updateText() {
+            headingElement.style.opacity = 0;
+            setTimeout(() => {
+                headingElement.textContent = messages[currentIndex];
+                headingElement.style.opacity = 1;
+                currentIndex = (currentIndex + 1) % messages.length;
+            }, 500);
+        }
+
+        // Initial update
+        updateText();
+        // Update every 5 seconds
+        setInterval(updateText, 2000);
+
+        // Optional: Add color transition
+        const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#ff9f43'];
+        let colorIndex = 0;
+        
+        function updateColor() {
+            document.documentElement.style.setProperty(
+                '--hero-text-color', 
+                colors[colorIndex]
+            );
+            colorIndex = (colorIndex + 1) % colors.length;
+        }
+        
+        // Uncomment to enable color transitions
+        // setInterval(updateColor, 7000);
+    </script>
+    }
