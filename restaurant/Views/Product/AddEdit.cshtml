@@ -3,76 +3,116 @@
     ViewBag.Title = $"{ViewBag.Operation} Menu Item";
 }
 
-<h1>@ViewBag.Operation Menu Item</h1>
-<form asp-action="AddEdit" method="post" enctype="multipart/form-data">
-    <input type="hidden" asp-for="ProductId" />
-    <input type="hidden" asp-for="CategoryId" />
-    <input type="hidden" asp-for="ImageUrl" />
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" name="Name" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <input asp-for="Description" class="form-control" name="Description" />
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" name="Price" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Stock">Quantity In Stock</label>
-        <input asp-for="Stock" class="form-control" name="Stock" />
-        <span asp-validation-for="Stock" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label for="imageUpload">Upload New Image (Optional)</label>
-        @if (Model.ProductId != 0 && !string.IsNullOrEmpty(Model.ImageUrl) && Model.ImageUrl != "https://via.placeholder.com/150")
-        {
-                <div>
-                    <img src="@Url.Content("~/images/" + Model.ImageUrl)" alt="Current Image" style="max-width: 200px; height: auto;" />
-                    <p>Current Image</p>
+<div class="container py-5">
+    <h1 class="fw-bold mb-5">@ViewBag.Operation Menu Item</h1>
+
+    <div class="card shadow-sm rounded-lg">
+        <div class="card-body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-lg mb-4" role="alert">
+                        <h5 class="alert-heading">Please fix the following errors:</h5>
+                        <ul class="mb-0">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                                    <li>@error.ErrorMessage</li>
+                        }
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+            }
+
+            <form asp-action="AddEdit" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="ProductId" />
+                <input type="hidden" asp-for="CategoryId" />
+                <input type="hidden" asp-for="ImageUrl" />
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-bold"></label>
+                            <input asp-for="Name" class="form-control form-control-sm rounded-lg" name="Name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold"></label>
+                            <input asp-for="Description" class="form-control form-control-sm rounded-lg" name="Description" />
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label fw-bold"></label>
+                            <input asp-for="Price" class="form-control form-control-sm rounded-lg" name="Price" />
+                            <span asp-validation-for="Price" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Stock" class="form-label fw-bold">Quantity In Stock</label>
+                            <input asp-for="Stock" class="form-control form-control-sm rounded-lg" name="Stock" />
+                            <span asp-validation-for="Stock" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="imageUpload" class="form-label fw-bold">Upload New Image (Optional)</label>
+                            @if (Model.ProductId != 0 && !string.IsNullOrEmpty(Model.ImageUrl) && Model.ImageUrl != "https://via.placeholder.com/150")
+                            {
+                                    <div class="mb-2">
+                                        <img src="@Url.Content("~/images/" + Model.ImageUrl)" alt="Current Image" 
+                                             class="img-fluid rounded-lg border" style="max-width: 200px; height: auto;" />
+                                        <p class="text-muted small mt-1">Current Image</p>
+                                    </div>
+                            }
+                            <input type="file" class="form-control form-control-sm rounded-lg" id="imageUpload" name="ImageFile" 
+                                   asp-for="ImageFile" accept="image/*" />
+                            <span asp-validation-for="ImageFile" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5 class="fw-bold">Categories</h5>
+                            <div class="row">
+                                @foreach (Category category in ViewBag.Categories ?? new List<Category>())
+                                {
+                                        <div class="col-6">
+                                            <div class="form-check mb-2">
+                                            @{
+                                                bool isChecked = Model.CategoryId == category.CategoryId;
+                                            }
+                                                <input type="radio" class="form-check-input" id="cat_@category.CategoryId" 
+                                                       name="catId" value="@category.CategoryId" @(isChecked ? "checked" : "") />
+                                                <label class="form-check-label" for="cat_@category.CategoryId">@category.Name</label>
+                                            </div>
+                                        </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h5 class="fw-bold">Ingredients</h5>
+                            <div class="row">
+                                @foreach (Ingredient ingredient in ViewBag.Ingredients ?? new List<Ingredient>())
+                                {
+                                        <div class="col-6">
+                                            <div class="form-check mb-2">
+                                            @{
+                                                bool isChecked = Model.ProductIngredients != null &&
+                                                                Model.ProductIngredients.Any(i => i.IngredientId == ingredient.IngredientId);
+                                            }
+                                                <input type="checkbox" class="form-check-input" id="ing_@ingredient.IngredientId" 
+                                                       name="ingredientIds" value="@ingredient.IngredientId" @(isChecked ? "checked" : "") />
+                                                <label class="form-check-label" for="ing_@ingredient.IngredientId">@ingredient.Name</label>
+                                            </div>
+                                        </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
                 </div>
-        }
-        <input type="file" class="form-control" id="imageUpload" name="ImageFile" asp-for="ImageFile" accept="image/*" />
-        <span asp-validation-for="ImageFile" class="text-danger"></span>
-    </div>
-    <div class="row">
-        <div class="col">
-            <h5>Categories</h5>
-            @foreach (Category category in ViewBag.Categories)
-            {
-                    <div class="form-check">
-                    @{
-                        bool isChecked = Model.CategoryId == category.CategoryId;
-                    }
-                        <input type="radio" class="form-check-input" id="@category.CategoryId" name="catId" value="@category.CategoryId" @(isChecked ? "checked" : "") />
-                        <label class="form-check-label" for="@category.CategoryId">@category.Name</label>
-                    </div>
-            }
-        </div>
-        <div class="col">
-            <h5>Ingredients</h5>
-            @foreach (Ingredient ingredient in ViewBag.Ingredients)
-            {
-                    <div class="form-check">
-                    @{
-                        bool isChecked = Model.ProductIngredients != null && Model.ProductIngredients.Any(i => i.IngredientId == ingredient.IngredientId);
-                    }
-                        <input type="checkbox" class="form-check-input" id="@ingredient.IngredientId" name="ingredientIds" value="@ingredient.IngredientId" @(isChecked ? "checked" : "") />
-                        <label class="form-check-label" for="@ingredient.IngredientId">@ingredient.Name</label>
-                    </div>
-            }
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-sm me-2">Save</button>
+                    <a asp-action="Index" asp-controller="Product" class="btn btn-secondary btn-sm">Cancel</a>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="form-group mt-3">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a asp-action="Index" asp-controller="Product" class="btn btn-outline-dark">Cancel</a>
-    </div>
-</form>
+</div>
 
 @section Scripts {
         <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>

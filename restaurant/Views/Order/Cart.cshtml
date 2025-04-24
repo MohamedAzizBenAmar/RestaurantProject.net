@@ -1,68 +1,98 @@
 ﻿@model OrderViewModel
-<h1>My Cart</h1>
-
-@if (Model.OrderItems.Count == 0)
-{
-        <p>Your cart is empty.</p>
-        <a asp-action="Create" class="btn btn-primary">Continue Shopping</a>
+@{
+    ViewData["Title"] = "My Cart";
 }
-else
-{
-    @if (!ViewData.ModelState.IsValid)
-    {
-                <div class="alert alert-danger" role="alert">
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                            <p>@error.ErrorMessage</p>
-            }
-                </div>
-    }
 
-        <h3>Order Items</h3>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+<div class="container py-5">
+    <h1 class="fw-bold mb-5">My Cart</h1>
+
+    @if (Model.OrderItems.Count == 0)
+    {
+            <div class="alert alert-info rounded-lg text-center" role="alert">
+                <p class="mb-0">Your cart is empty.</p>
+                <a asp-action="Create" class="btn btn-primary mt-3">Continue Shopping</a>
+            </div>
+    }
+    else
+    {
+        @if (!ViewData.ModelState.IsValid)
+        {
+                    <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-lg" role="alert">
+                        <h5 class="alert-heading">Oops! There was a problem</h5>
+                        <ul class="mb-0">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                                    <li>@error.ErrorMessage</li>
+                    }
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+        }
+
+            <div class="row g-4 mb-5">
             @foreach (var item in Model.OrderItems)
             {
-                        <tr>
-                            <td>@item.ProductName</td>
-                            <td>
-                                <form asp-action="UpdateItem" method="post" class="d-inline">
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control d-inline-block" style="width: 80px;" />
-                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                                </form>
-                            </td>
-                            <td>@item.Price.ToString("C")</td>
-                            <td>@((item.Price * item.Quantity).ToString("C"))</td>
-                            <td>
-                                <form asp-action="DeleteItem" method="post" class="d-inline">
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-                                    <button type="submit" class="btn btn-sm btn-danger">Remove</button>
-                                </form>
-                            </td>
-                        </tr>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm rounded-lg">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">@item.ProductName</h5>
+                                    <p class="card-text text-muted mb-3">Price: @item.Price.ToString("C")</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="h5 text-primary fw-bold mb-0">Total: @((item.Price * item.Quantity).ToString("C"))</span>
+                                            <span class="text-muted small">Qty: @item.Quantity</span>
+                                        </div>
+                                        <form asp-action="UpdateItem" method="post" class="d-flex align-items-center gap-2 mb-2">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <div class="input-group input-group-sm" style="width: 130px;">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity(this)">-</button>
+                                                <input type="number" min="1" name="quantity" value="@item.Quantity" 
+                                                       class="form-control text-center" style="width: 60px;" readonly>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity(this)">+</button>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                                        </form>
+                                        <form asp-action="DeleteItem" method="post" class="d-flex">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                <i class="bi bi-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
             }
-                <tr>
-                    <td colspan="3" class="text-right fw-bold">Total:</td>
-                    <td class="bg-primary bg-gradient text-white fw-bold">@Model.TotalAmount.ToString("C")</td>
-                    <td></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <form asp-action="PlaceOrder" method="post">
-            <div class="form-group">
-                <input type="submit" value="Place Order" class="btn btn-primary" />
-                <a asp-action="Create" class="btn btn-secondary">Continue Shopping</a>
             </div>
-        </form>
+
+            <div class="card shadow-sm rounded-lg mb-5">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold mb-0">Total: @Model.TotalAmount.ToString("C")</h4>
+                    <div class="d-flex gap-2">
+                        <a asp-action="Create" class="btn btn-secondary btn-sm">Continue Shopping</a>
+                        <form asp-action="PlaceOrder" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-primary btn-sm">Place Order</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    }
+</div>
+
+@section Scripts {
+        <script>
+            function incrementQuantity(button) {
+                var input = $(button).siblings('input[name="quantity"]');
+                var value = parseInt(input.val());
+                input.val(value + 1);
+            }
+
+            function decrementQuantity(button) {
+                var input = $(button).siblings('input[name="quantity"]');
+                var value = parseInt(input.val());
+                if (value > 1) {
+                    input.val(value - 1);
+                }
+            }
+        </script>
 }
