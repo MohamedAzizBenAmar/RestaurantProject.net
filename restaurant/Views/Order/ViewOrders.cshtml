@@ -2,44 +2,74 @@
 @{
     ViewData["Title"] = "My Orders";
 }
-<h1>My Orders</h1>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Order Date</th>
-            <th>Status</th>
-            <th>Total Amount</th>
-            <th>Order Items</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var order in Model)
+
+<div class="container py-5">
+    <h1 class="fw-bold mb-5">My Orders</h1>
+
+    @if (!Model.Any())
+    {
+            <div class="alert alert-info rounded-lg text-center" role="alert">
+                <p class="mb-0">You have no orders yet.</p>
+                <a asp-controller="Order" asp-action="Create" class="btn btn-primary mt-3">Start Shopping</a>
+            </div>
+    }
+    else
+    {
+        @if (!ViewData.ModelState.IsValid)
         {
-                <tr>
-                    <td>@order.OrderId</td>
-                    <td>@order.OrderDate.ToString("MM/dd/yyyy")</td>
-                    <td>@order.Status</td>
-                    <td>@order.TotalAmount.ToString("C")</td>
-                    <td>
-                        <ul>
-                        @foreach (var item in order.OrderItems)
-                        {
-                                    <li>@item.Product.Name - @item.Quantity x @item.Price.ToString("C")</li>
-                        }
-                        </ul>
-                    </td>
-                    <td>
-                    @if (order.Status == OrderStatus.Pending)
+                    <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-lg" role="alert">
+                        <h5 class="alert-heading">Oops! There was a problem</h5>
+                        <ul class="mb-0">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                     {
-                                <form asp-action="CancelOrder" method="post" class="d-inline">
-                                    <input type="hidden" name="orderId" value="@order.OrderId" />
-                                    <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
-                                </form>
+                                    <li>@error.ErrorMessage</li>
                     }
-                    </td>
-                </tr>
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
         }
-    </tbody>
-</table>
+
+            <div class="row g-4">
+            @foreach (var order in Model)
+            {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm rounded-lg">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="card-title fw-bold mb-0">Order #@order.OrderId</h5>
+                                        <span class="badge bg-@(order.Status == OrderStatus.Pending ? "warning" : order.Status == OrderStatus.Canceled ? "danger" : "success") text-white rounded-pill">
+                                    @order.Status
+                                        </span>
+                                    </div>
+                                    <p class="card-text text-muted mb-2">Date: @order.OrderDate.ToString("MM/dd/yyyy")</p>
+                                    <h6 class="fw-bold mb-2">Items:</h6>
+                                    <ul class="list-group list-group-flush mb-3">
+                                @foreach (var item in order.OrderItems)
+                                {
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span>@item.Product.Name</span>
+                                                    <span class="text-muted small">@item.Quantity x @item.Price.ToString("C")</span>
+                                                </li>
+                                }
+                                    </ul>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="h5 text-primary fw-bold mb-0">Total: @order.TotalAmount.ToString("C")</span>
+                                        </div>
+                                @if (order.Status == OrderStatus.Pending)
+                                {
+                                                <form asp-action="CancelOrder" method="post" class="d-flex">
+                                                    <input type="hidden" name="orderId" value="@order.OrderId" />
+                                                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                        <i class="bi bi-x-circle"></i> Cancel Order
+                                                    </button>
+                                                </form>
+                                }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            }
+            </div>
+    }
+</div>

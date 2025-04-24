@@ -1,0 +1,68 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="container pt-6 pb-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm rounded-lg p-4 bg-white">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Log in</h2>
+                    <p class="text-muted small">Welcome back! Please enter your details</p>
+                </div>
+                <form id="account" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-lg mb-3" role="alert"></div>
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label fw-bold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Input.Email" class="form-control form-control-sm rounded-lg" 
+                                   autocomplete="username" aria-required="true" placeholder="Enter your email" />
+                        </div>
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label fw-bold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Input.Password" class="form-control form-control-sm rounded-lg" 
+                                   autocomplete="current-password" aria-required="true" placeholder="Enter your password" />
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="Input.RememberMe" />
+                            <label class="form-check-label" asp-for="Input.RememberMe">Remember me</label>
+                        </div>
+                        <a id="forgot-password" asp-page="./ForgotPassword" style="color: var(--primary-color);" class="small">Forgot password?</a>
+                    </div>
+                    <div class="d-grid mb-3">
+                        <button id="login-submit" type="submit" class="btn btn-primary btn-sm" 
+                                style="background-color: var(--primary-color); border-color: var(--primary-color);">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        </button>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-muted small">
+                            Don't have an account? 
+                            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" style="color: var(--primary-color);">Sign up</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+    }
+</style>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using restaurant.Data;
@@ -10,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace restaurant.Controllers
 {
+    [Authorize(Roles = "Admin")]
+
     public class ProductController : Controller
     {
         private Repository<Product> products;
@@ -25,6 +28,7 @@ namespace restaurant.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
+        //[AllowAnonymous]
         public async Task<IActionResult> Index(string searchName, int? categoryId, int? ingredientId)
         {
             ViewBag.Categories = await categories.GetAllAsync();

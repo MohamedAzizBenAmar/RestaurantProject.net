@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using restaurant.Data;
 using restaurant.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ namespace restaurant.Controllers
         private readonly ApplicationDbContext _context;
         private Repository<Product> _products;
         private Repository<Order> _orders;
+        private Repository<Category> _categories;
+        private Repository<Ingredient> _ingredients;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public OrderController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
@@ -21,9 +24,11 @@ namespace restaurant.Controllers
             _userManager = userManager;
             _products = new Repository<Product>(context);
             _orders = new Repository<Order>(context);
+            _categories = new Repository<Category>(context);
+            _ingredients = new Repository<Ingredient>(context);
         }
+        
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -32,11 +37,13 @@ namespace restaurant.Controllers
                 OrderItems = new List<OrderItemViewModel>(),
                 Products = await _products.GetAllAsync()
             };
+            ViewBag.Categories = await _categories.GetAllAsync();
+            ViewBag.Ingredients = await _ingredients.GetAllAsync();
             return View(model);
         }
+        [Authorize(Roles = "User")]
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> AddItem(int prodId, int prodQty)
         {
             var product = await _context.Products.FindAsync(prodId);
@@ -51,15 +58,14 @@ namespace restaurant.Controllers
                 Products = await _products.GetAllAsync()
             };
 
-            // Calculate total quantity in cart for this product
             var existingItem = model.OrderItems.FirstOrDefault(oi => oi.ProductId == prodId);
             var totalQuantity = (existingItem?.Quantity ?? 0) + prodQty;
 
-            // Validate stock
             if (totalQuantity > product.Stock)
             {
                 ModelState.AddModelError("", $"Cannot add {prodQty} of {product.Name}. Only {product.Stock} available in stock.");
-                model.Products = await _products.GetAllAsync(); // Refresh products for view
+                ViewBag.Categories = await _categories.GetAllAsync();
+                ViewBag.Ingredients = await _ingredients.GetAllAsync();
                 return View("Create", model);
             }
 
@@ -82,9 +88,45 @@ namespace restaurant.Controllers
             HttpContext.Session.Set("OrderViewModel", model);
             return RedirectToAction("Create");
         }
+        
 
         [HttpGet]
+        public async Task<IActionResult> Search(string searchName, int? categoryId, int? ingredientId)
+        {
+            try
+            {
+                var queryOptions = new QueryOptions<Product>
+                {
+                    Includes = "Category,ProductIngredients.Ingredient"
+                };
+                var productsList = await _products.GetAllAsync();
+
+                if (!string.IsNullOrEmpty(searchName))
+                {
+                    productsList = productsList.Where(p => p.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (categoryId.HasValue)
+                {
+                    productsList = productsList.Where(p => p.CategoryId == categoryId.Value);
+                }
+
+                if (ingredientId.HasValue)
+                {
+                    productsList = productsList.Where(p => p.ProductIngredients.Any(pi => pi.IngredientId == ingredientId.Value));
+                }
+
+                return PartialView("_OrderList", productsList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Search error: {ex.Message}");
+                return StatusCode(500, "Error loading products.");
+            }
+        }
         [Authorize]
+
+        [HttpGet]
         public async Task<IActionResult> Cart()
         {
             var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
@@ -94,9 +136,9 @@ namespace restaurant.Controllers
             }
             return View(model);
         }
+        [Authorize]
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> UpdateItem(int productId, int quantity)
         {
             var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
@@ -111,7 +153,6 @@ namespace restaurant.Controllers
                 return NotFound();
             }
 
-            // Validate stock
             var product = await _context.Products.FindAsync(productId);
             if (product == null)
             {
@@ -136,9 +177,9 @@ namespace restaurant.Controllers
             HttpContext.Session.Set("OrderViewModel", model);
             return RedirectToAction("Cart");
         }
+        [Authorize]
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> DeleteItem(int productId)
         {
             var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
@@ -158,9 +199,9 @@ namespace restaurant.Controllers
             HttpContext.Session.Set("OrderViewModel", model);
             return RedirectToAction("Cart");
         }
+        [Authorize]
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> PlaceOrder()
         {
             var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
@@ -195,9 +236,9 @@ namespace restaurant.Controllers
             HttpContext.Session.Remove("OrderViewModel");
             return RedirectToAction("ViewOrders");
         }
+        [Authorize]
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> ViewOrders()
         {
             var userId = _userManager.GetUserId(User);
@@ -207,9 +248,9 @@ namespace restaurant.Controllers
             });
             return View(userOrders);
         }
+        [Authorize]
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> CancelOrder(int orderId)
         {
             var order = await _orders.GetByIdAsync(orderId, new QueryOptions<Order> { Includes = "OrderItems.Product" });

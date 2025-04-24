@@ -1,45 +1,159 @@
 ﻿@model OrderViewModel
 @{
-    ViewBag.Title = "Create Order";
-}
-<h1>Create Order</h1>
-
-@if (!ViewData.ModelState.IsValid)
-{
-        <div class="alert alert-danger" role="alert">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-                    <p>@error.ErrorMessage</p>
-        }
-        </div>
+    ViewData["Title"] = "Create Order";
 }
 
-<div class="row">
-    @foreach (var product in Model.Products)
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1 class="fw-bold">Create Your Order</h1>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
     {
-            <div class="col-md-4 mb-4">
-                <form asp-action="AddItem" method="post">
-                    <input type="hidden" name="prodId" value="@product.ProductId" />
-                    <div class="card" style="width: 18rem;">
-                        <img src="@Url.Content("~/images/" + product.ImageUrl)" class="card-img-top fixed-image-height" alt="@product.Description" />
-                        <div class="card-body">
-                            <h5 class="card-title">@product.Name</h5>
-                            <p class="card-text">@product.Description</p>
-                            <p class="card-text">@product.Price.ToString("C")</p>
-                            <p class="card-text">@(product.Stock > 0 ? "In Stock" : "Out of Stock")</p>
-                        @if (product.Stock > 0)
-                        {
-                                    <input type="number" min="1" name="prodQty" value="1" class="form-control mb-2" style="width: 100px;" />
-                                    <button type="submit" class="btn btn-primary">Add to Order</button>
-                        }
-                        else
-                        {
-                                    <button type="submit" class="btn btn-primary" disabled>Add to Order</button>
-                        }
-                        </div>
-                    </div>
-                </form>
+            <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-lg" role="alert">
+                <h5 class="alert-heading">Oops! There was a problem</h5>
+                <ul class="mb-0">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                            <li>@error.ErrorMessage</li>
+                }
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
     }
+
+    <div class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control rounded-lg" placeholder="Search menu items...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="categoryFilter" class="form-select rounded-lg">
+                    <option value="">All Categories</option>
+                    @foreach (var category in ViewBag.Categories ?? new List<Category>())
+                    {
+                            <option value="@category.CategoryId">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="ingredientFilter" class="form-select rounded-lg">
+                    <option value="">All Ingredients</option>
+                    @foreach (var ingredient in ViewBag.Ingredients ?? new List<Ingredient>())
+                    {
+                            <option value="@ingredient.IngredientId">@ingredient.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4" id="productList">
+        @foreach (var product in Model.Products)
+        {
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 shadow-sm rounded-lg">
+                        <div class="position-relative">
+                            <img src="@Url.Content("~/images/" + (string.IsNullOrEmpty(product.ImageUrl) ? "placeholder.jpg" : product.ImageUrl))" 
+                                 class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
+                            <span class="position-absolute top-0 end-0 bg-@(product.Stock > 0 ? "success" : "danger") text-white px-2 py-1 m-2 rounded-pill small">
+                            @(product.Stock > 0 ? "Available" : "Not Available")
+                            </span>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-3">
+                                <h5 class="card-title fw-bold">@product.Name</h5>
+                                <p class="card-text text-muted">@product.Description</p>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="h5 text-primary fw-bold mb-0">@product.Price.ToString("C")</span>
+                                </div>
+                            @if (product.Stock > 0)
+                            {
+                                        <form asp-action="AddItem" method="post" class="d-flex align-items-center gap-2">
+                                            <input type="hidden" name="prodId" value="@product.ProductId" />
+                                            <div class="input-group input-group-sm" style="width: 130px;">
+                                                <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity(this)">-</button>
+                                                <input type="number" min="1" max="@product.Stock" name="prodQty" value="1" 
+                                                       class="form-control text-center" style="width: 60px;" readonly>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity(this)">+</button>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="bi bi-plus-lg"></i> Add
+                                            </button>
+                                        </form>
+                            }
+                            else
+                            {
+                                        <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                            Not Available
+                                        </button>
+                            }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        }
+    </div>
+    <div id="loadingSpinner" class="text-center mt-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 </div>
 
+@section Scripts {
+        <script>
+            $(document).ready(function() {
+                function filterProducts() {
+                    var searchText = $('#searchInput').val().toLowerCase();
+                    var categoryId = $('#categoryFilter').val();
+                    var ingredientId = $('#ingredientFilter').val();
+
+                    $('#loadingSpinner').show();
+                    $.ajax({
+                        url: '@Url.Action("Search", "Order")',
+                        type: 'GET',
+                        data: { searchName: searchText, categoryId: categoryId, ingredientId: ingredientId },
+                        success: function(data) {
+                            $('#productList').html(data);
+                            $('#loadingSpinner').hide();
+                        },
+                        error: function() {
+                            alert('Error loading products.');
+                            $('#loadingSpinner').hide();
+                        }
+                    });
+                }
+
+                $('#searchInput').on('input', function() {
+                    filterProducts();
+                });
+
+                $('#categoryFilter, #ingredientFilter').on('change', function() {
+                    filterProducts();
+                });
+            });
+
+            function incrementQuantity(button) {
+                var input = $(button).siblings('input[name="prodQty"]');
+                var value = parseInt(input.val());
+                var max = parseInt(input.attr('max'));
+                if (value < max) {
+                    input.val(value + 1);
+                }
+            }
+
+            function decrementQuantity(button) {
+                var input = $(button).siblings('input[name="prodQty"]');
+                var value = parseInt(input.val());
+                if (value > 1) {
+                    input.val(value - 1);
+                }
+            }
+        </script>
+}

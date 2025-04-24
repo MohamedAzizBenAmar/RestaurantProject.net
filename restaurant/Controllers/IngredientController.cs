@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using restaurant.Data;
 using restaurant.Models;
 using System;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace restaurant.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class IngredientController : Controller
     {
         private readonly Repository<Ingredient> _ingredients;

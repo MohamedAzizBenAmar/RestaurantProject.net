@@ -1,16 +1,100 @@
 ﻿@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @{
-    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    var user = await UserManager.GetUserAsync(User);
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var displayName = User.Identity?.Name?.Split('@')?[0] ?? "User"; // Extract username before @
 }
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item"><a class="nav-link id="orders" asp-action="ViewOrders" asp-controller="Order">My Orders</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
-    @if (hasExternalLogins)
-    {
-        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">External logins</a></li>
+
+<div class="profile-nav-container shadow-sm rounded-lg p-4 bg-white">
+    <div class="profile-header mb-4">
+        <div class="d-flex align-items-center">
+            <div class="profile-avatar me-3">
+                <i class="bi bi-person-circle fs-1" style="color: var(--primary-color);"></i>
+            </div>
+            <div>
+                <h5 class="mb-0 fw-bold">@displayName</h5>
+                <small class="text-muted">Account Settings</small>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav flex-column profile-nav">
+        <li class="nav-item">
+            <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">
+                <i class="bi bi-person me-2"></i> Profile
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="orders" asp-action="ViewOrders" asp-controller="Order">
+                <i class="bi bi-bag me-2"></i> My Orders
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">
+                <i class="bi bi-envelope me-2"></i> Email
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">
+                <i class="bi bi-shield-lock me-2"></i> Password
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">
+                <i class="bi bi-lock me-2"></i> Two-Factor Auth
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">
+                <i class="bi bi-database me-2"></i> Personal Data
+            </a>
+        </li>
+        @if (isAdmin)
+        {
+                <li class="nav-item admin-section mt-3 pt-2 border-top">
+                    <span class="small text-muted fw-bold px-3 mb-2 d-block">ADMIN</span>
+                    <a class="nav-link" id="manage-users" asp-area="Identity" asp-page="/Admin/ManageUsers">
+                        <i class="bi bi-people me-2"></i> Manage Users
+                    </a>
+                </li>
+        }
+    </ul>
+</div>
+
+<style>
+    .profile-nav-container {
+        background: white;
+        min-width: fit-content;
     }
-    <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
-</ul>
+
+    .profile-nav .nav-link {
+        color: #495057;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .profile-nav .nav-link:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+    }
+
+    .profile-nav .nav-link.active {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .profile-nav .nav-link i {
+        width: 24px;
+        text-align: center;
+    }
+
+    .admin-section .nav-link {
+        padding-left: 2rem;
+    }
+</style>

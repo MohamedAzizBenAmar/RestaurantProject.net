@@ -2,157 +2,152 @@
 @{
     ViewBag.Title = "Manage Categories";
 }
-@section Styles {
-        <style>
-            #categoryList {
-                min-height: 200px;
-            }
-            #globalError {
-                margin-bottom: 15px;
-                display: none;
-            }
-        </style>
-}
 
-<h2>Manage Categories</h2>
+<div class="container pt-6 pb-4">
+    <h1 class="fw-bold mb-5">Manage Categories</h1>
 
-@if (TempData["Success"] != null)
-{
-        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successAlert">
-        @TempData["Success"]
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-lg mb-4" role="alert" id="successAlert">
+            @TempData["Success"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-}
-@if (TempData["Error"] != null)
-{
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
-        @TempData["Error"]
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-lg mb-4" role="alert" id="errorAlert">
+            @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-}
-<div id="globalError" class="alert alert-danger"></div>
+    }
+    <div id="globalError" class="alert alert-danger rounded-lg" style="display: none;"></div>
 
-<div class="mb-4">
-    <div class="row">
-        <div class="col-md-4">
-            <input type="text" id="searchName" class="form-control" placeholder="Search by name" />
-        </div>
-        <div class="col-md-8">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Create New Category</button>
+    <div class="mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchName" class="form-control rounded-lg" placeholder="Search by name" />
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    <i class="bi bi-plus-circle"></i> Create New Category
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="categoryList">
-    @await Html.PartialAsync("_CategoryList", Model)
-</div>
+    <div id="categoryList">
+        @await Html.PartialAsync("_CategoryList", Model)
+    </div>
 
-<!-- Add Category Modal -->
-<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addCategoryForm" asp-action="Add" asp-controller="Category" method="post">
-                @Html.AntiForgeryToken()
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="addCategoryName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="addCategoryName" name="Name" required />
-                        <span class="text-danger field-validation-error" id="addCategoryNameError"></span>
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="addCategoryModalLabel">Create Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addCategoryForm" asp-action="Add" asp-controller="Category" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="addCategoryName" class="form-label fw-bold">Name</label>
+                            <input type="text" class="form-control form-control-sm rounded-lg" id="addCategoryName" name="Name" required />
+                            <span class="text-danger small" id="addCategoryNameError"></span>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Category Modal -->
-<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editCategoryForm" asp-action="Edit" asp-controller="Category" method="post">
-                @Html.AntiForgeryToken()
-                <div class="modal-body">
-                    <input type="hidden" id="editCategoryId" name="CategoryId" />
-                    <div class="form-group">
-                        <label for="editCategoryName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="editCategoryName" name="Name" required />
-                        <span class="text-danger field-validation-error" id="editCategoryNameError"></span>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Delete Category Modal -->
-<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteCategoryModalLabel">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editCategoryModalLabel">Edit Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editCategoryForm" asp-action="Edit" asp-controller="Category" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <input type="hidden" id="editCategoryId" name="CategoryId" />
+                        <div class="mb-3">
+                            <label for="editCategoryName" class="form-label fw-bold">Name</label>
+                            <input type="text" class="form-control form-control-sm rounded-lg" id="editCategoryName" name="Name" required />
+                            <span class="text-danger small" id="editCategoryNameError"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                    </div>
+                </form>
             </div>
-            <form id="deleteCategoryForm" asp-action="Delete" asp-controller="Category" method="post">
-                @Html.AntiForgeryToken()
-                <div class="modal-body">
-                    <input type="hidden" id="deleteCategoryId" name="id" />
-                    <p>Are you sure you want to delete this category?</p>
-                    <span class="text-danger" id="deleteError"></span>
+        </div>
+    </div>
+
+    <!-- Delete Category Modal -->
+    <div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="deleteCategoryModalLabel">Delete Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </div>
-            </form>
+                <form id="deleteCategoryForm" asp-action="Delete" asp-controller="Category" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <input type="hidden" id="deleteCategoryId" name="id" />
+                        <p>Are you sure you want to delete this category?</p>
+                        <p class="text-danger small" id="deleteError"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-        <script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            $(document).ready(function () {
-                // Auto-dismiss alerts after 3 seconds
+    <script>
+        $(document).ready(function () {
+            // Auto-dismiss alerts after 3 seconds
+            setTimeout(function () {
+                $('#successAlert, #errorAlert').fadeOut('slow');
+            }, 3000);
+
+            // Show global message (error or success)
+            function showGlobalMessage(message, isSuccess = false) {
+                $('#globalError')
+                    .removeClass('alert-danger alert-success')
+                    .addClass(isSuccess ? 'alert-success' : 'alert-danger')
+                    .text(message)
+                    .show();
                 setTimeout(function () {
-                    $('#successAlert, #errorAlert').fadeOut('slow');
+                    $('#globalError').fadeOut('slow');
                 }, 3000);
+            }
 
-                // Show global message (error or success)
-                function showGlobalMessage(message, isSuccess = false) {
-                    $('#globalError')
-                        .removeClass('alert-danger alert-success')
-                        .addClass(isSuccess ? 'alert-success' : 'alert-danger')
-                        .text(message)
-                        .show();
-                    setTimeout(function () {
-                        $('#globalError').fadeOut('slow');
-                    }, 3000);
+            // Dynamic Search
+            function performSearch(clearSearch = false) {
+                var searchName = clearSearch ? '' : $('#searchName').val();
+                if (clearSearch) {
+                    $('#searchName').val('');
                 }
-
-                // Dynamic Search
-                function performSearch(clearSearch = false) {
-                    var searchName = clearSearch ? '' : $('#searchName').val();
-                    if (clearSearch) {
-                        $('#searchName').val('');
-                    }
-                    console.log('Performing search, clearSearch:', clearSearch);
+                console.log('Performing search, clearSearch:', clearSearch);
+                try {
                     $.ajax({
                         url: '@Url.Action("Search", "Category")',
                         type: 'GET',
@@ -167,33 +162,30 @@
                             $('#categoryList').html('<p>Error loading categories.</p>');
                         }
                     });
+                } catch (e) {
+                    console.error('Search error:', e);
+                    showGlobalMessage('Unexpected error during search.');
                 }
+            }
 
-                $('#searchName').on('input', function () {
-                    performSearch();
-                });
-
-                // Initial load
+            $('#searchName').on('input', function () {
                 performSearch();
+            });
 
-                // Clean up modal state
-                $('#addCategoryModal, #editCategoryModal, #deleteCategoryModal').on('show.bs.modal', function () {
-                    $('.modal-backdrop').remove();
-                    $('body').removeClass('modal-open');
-                    $('#addCategoryNameError, #editCategoryNameError, #deleteError').text('');
-                });
+            // Initial load
+            performSearch();
 
-                $('#addCategoryModal, #editCategoryModal, #deleteCategoryModal').on('hidden.bs.modal', function () {
-                    setTimeout(function () {
-                        $('.modal-backdrop').remove();
-                        $('body').removeClass('modal-open');
-                    }, 100);
-                });
+            // Clean up modal state
+            $('#addCategoryModal, #editCategoryModal, #deleteCategoryModal').on('hidden.bs.modal', function () {
+                $(this).find('form')[0].reset();
+                $(this).find('.text-danger').text('');
+            });
 
-                // Add Category
-                $('#addCategoryForm').on('submit', function (e) {
-                    e.preventDefault();
-                    console.log('Add form submitted');
+            // Add Category
+            $('#addCategoryForm').on('submit', function (e) {
+                e.preventDefault();
+                console.log('Add form submitted');
+                try {
                     $.ajax({
                         url: '@Url.Action("Add", "Category")',
                         type: 'POST',
@@ -202,8 +194,6 @@
                             console.log('Add AJAX response:', JSON.stringify(response, null, 2));
                             if (response.success) {
                                 $('#addCategoryModal').modal('hide');
-                                $('#addCategoryForm')[0].reset();
-                                $('#addCategoryNameError').text('');
                                 performSearch(true);
                                 showGlobalMessage('Category added successfully.', true);
                             } else {
@@ -215,16 +205,22 @@
                             $('#addCategoryNameError').text('An error occurred. Please try again.');
                         }
                     });
-                });
+                } catch (e) {
+                    console.error('Add error:', e);
+                    $('#addCategoryNameError').text('Unexpected error adding category.');
+                }
+            });
 
-                // Edit Category
-                $(document).on('click', '.edit-btn', function () {
-                    var categoryId = $(this).data('id');
-                    console.log('Edit button clicked for category ID:', categoryId);
-                    if (!categoryId || isNaN(categoryId)) {
-                        showGlobalMessage('Invalid category ID.');
-                        return;
-                    }
+            // Edit Category
+            $(document).on('click', '.edit-btn', function (e) {
+                e.stopPropagation();
+                var categoryId = $(this).data('id');
+                console.log('Edit button clicked for category ID:', categoryId);
+                if (!categoryId || isNaN(categoryId)) {
+                    showGlobalMessage('Invalid category ID.');
+                    return;
+                }
+                try {
                     $.ajax({
                         url: '@Url.Action("Edit", "Category")',
                         type: 'GET',
@@ -234,7 +230,6 @@
                             if (response && response.success && response.category && response.category.categoryId) {
                                 $('#editCategoryId').val(response.category.categoryId);
                                 $('#editCategoryName').val(response.category.name);
-                                $('#editCategoryNameError').text('');
                                 $('#editCategoryModal').modal('show');
                             } else {
                                 showGlobalMessage(response && response.message ? response.message : 'Failed to load category data.');
@@ -245,16 +240,21 @@
                             showGlobalMessage('Error loading category data: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
                         }
                     });
-                });
+                } catch (e) {
+                    console.error('Edit error:', e);
+                    showGlobalMessage('Unexpected error loading category.');
+                }
+            });
 
-                $('#editCategoryForm').on('submit', function (e) {
-                    e.preventDefault();
-                    var categoryId = $('#editCategoryId').val();
-                    console.log('Edit form submitted, CategoryId:', categoryId);
-                    if (!categoryId || isNaN(categoryId)) {
-                        $('#editCategoryNameError').text('Category ID is missing or invalid.');
-                        return;
-                    }
+            $('#editCategoryForm').on('submit', function (e) {
+                e.preventDefault();
+                var categoryId = $('#editCategoryId').val();
+                console.log('Edit form submitted, CategoryId:', categoryId);
+                if (!categoryId || isNaN(categoryId)) {
+                    $('#editCategoryNameError').text('Category ID is missing or invalid.');
+                    return;
+                }
+                try {
                     $.ajax({
                         url: '@Url.Action("Edit", "Category")',
                         type: 'POST',
@@ -263,8 +263,6 @@
                             console.log('Edit POST response:', JSON.stringify(response, null, 2));
                             if (response && response.success) {
                                 $('#editCategoryModal').modal('hide');
-                                $('#editCategoryForm')[0].reset();
-                                $('#editCategoryNameError').text('');
                                 performSearch(true);
                                 showGlobalMessage('Category updated successfully.', true);
                             } else {
@@ -276,16 +274,22 @@
                             $('#editCategoryNameError').text('Error saving category: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
                         }
                     });
-                });
+                } catch (e) {
+                    console.error('Edit save error:', e);
+                    $('#editCategoryNameError').text('Unexpected error saving category.');
+                }
+            });
 
-                // Delete Category
-                $(document).on('click', '.delete-btn', function () {
-                    var categoryId = $(this).data('id');
-                    console.log('Delete button clicked for category ID:', categoryId);
-                    if (!categoryId || isNaN(categoryId)) {
-                        showGlobalMessage('Invalid category ID.');
-                        return;
-                    }
+            // Delete Category
+            $(document).on('click', '.delete-btn', function (e) {
+                e.stopPropagation();
+                var categoryId = $(this).data('id');
+                console.log('Delete button clicked for category ID:', categoryId);
+                if (!categoryId || isNaN(categoryId)) {
+                    showGlobalMessage('Invalid category ID.');
+                    return;
+                }
+                try {
                     $.ajax({
                         url: '@Url.Action("DeleteCheck", "Category")',
                         type: 'GET',
@@ -294,7 +298,6 @@
                             console.log('DeleteCheck GET response:', JSON.stringify(response, null, 2));
                             if (response && response.success && response.category && response.category.categoryId) {
                                 $('#deleteCategoryId').val(response.category.categoryId);
-                                $('#deleteError').text('');
                                 $('#deleteCategoryModal').modal('show');
                             } else {
                                 showGlobalMessage(response && response.message ? response.message : 'Failed to load category data.');
@@ -305,16 +308,21 @@
                             showGlobalMessage('Error loading category data: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
                         }
                     });
-                });
+                } catch (e) {
+                    console.error('Delete check error:', e);
+                    showGlobalMessage('Unexpected error checking category.');
+                }
+            });
 
-                $('#deleteCategoryForm').on('submit', function (e) {
-                    e.preventDefault();
-                    var categoryId = $('#deleteCategoryId').val();
-                    console.log('Delete form submitted, CategoryId:', categoryId);
-                    if (!categoryId || isNaN(categoryId)) {
-                        $('#deleteError').text('Category ID is missing or invalid.');
-                        return;
-                    }
+            $('#deleteCategoryForm').on('submit', function (e) {
+                e.preventDefault();
+                var categoryId = $('#deleteCategoryId').val();
+                console.log('Delete form submitted, CategoryId:', categoryId);
+                if (!categoryId || isNaN(categoryId)) {
+                    $('#deleteError').text('Category ID is missing or invalid.');
+                    return;
+                }
+                try {
                     $.ajax({
                         url: '@Url.Action("Delete", "Category")',
                         type: 'POST',
@@ -323,8 +331,6 @@
                             console.log('Delete POST response:', JSON.stringify(response, null, 2));
                             if (response && response.success) {
                                 $('#deleteCategoryModal').modal('hide');
-                                $('#deleteCategoryForm')[0].reset();
-                                $('#deleteError').text('');
                                 performSearch(true);
                                 showGlobalMessage('Category deleted successfully.', true);
                             } else {
@@ -336,7 +342,11 @@
                             $('#deleteError').text('Error deleting category: ' + (xhr.responseText || 'Request failed (Status: ' + xhr.status + ')'));
                         }
                     });
-                });
+                } catch (e) {
+                    console.error('Delete error:', e);
+                    $('#deleteError').text('Unexpected error deleting category.');
+                }
             });
-        </script>
+        });
+    </script>
 }

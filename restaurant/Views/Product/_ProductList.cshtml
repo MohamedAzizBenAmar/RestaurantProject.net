@@ -2,23 +2,43 @@
 
 @if (!Model.Any())
 {
-        <p>No products found.</p>
+        <div class="alert alert-info rounded-lg text-center" role="alert">
+            <p class="mb-0">No products found.</p>
+        </div>
 }
 else
 {
-        <div class="row">
+        <div class="row g-4">
         @foreach (Product prod in Model)
         {
-                    <div class="col-md-4 mb-4">
-                        <div class="card" style="width: 18rem">
-                            <img src="@Url.Content("~/images/" + prod?.ImageUrl)" class="card-img-top fixed-image-height" alt="@prod.Description" />
-                            <div class="card-body">
-                                <h5 class="card-title">@prod.Name</h5>
-                                <p class="card-text">@prod.Description</p>
-                                <p class="card-text">@prod.Price.ToString("C")</p>
-                                <p class="card-text">Stock: @prod.Stock</p>
-                                <a class="btn btn-info" asp-controller="Product" asp-action="AddEdit" asp-route-id="@prod.ProductId"><i class="bi bi-pencil-fill">Edit</i></a>
-                                <button type="button" class="btn btn-danger delete-btn" data-id="@prod.ProductId"><i class="bi bi-trash">Delete</i></button>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm rounded-lg">
+                            <div class="position-relative">
+                                <img src="@Url.Content("~/images/" + (string.IsNullOrEmpty(prod.ImageUrl) ? "placeholder.jpg" : prod.ImageUrl))" 
+                                     class="card-img-top fixed-image-height" alt="@prod.Name">
+                                <span class="position-absolute top-0 end-0 bg-@(prod.Stock > 0 ? "success" : "danger") text-white px-2 py-1 m-2 rounded-pill small">
+                            @(prod.Stock > 0 ? "Available" : "Not Available")
+                                </span>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-3">
+                                    <h5 class="card-title fw-bold">@prod.Name</h5>
+                                    <p class="card-text text-muted">@prod.Description</p>
+                                </div>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="h5 text-primary fw-bold mb-0">@prod.Price.ToString("C")</span>
+                                        <span class="text-muted small">Stock: @prod.Stock</span>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a class="btn btn-primary btn-sm" asp-controller="Product" asp-action="AddEdit" asp-route-id="@prod.ProductId">
+                                            <i class="bi bi-pencil-fill"></i> Edit
+                                        </a>
+                                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="@prod.ProductId">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,50 @@
+﻿@model IEnumerable<restaurant.Models.Product>
+
+<div class="row g-4">
+    @foreach (var product in Model)
+    {
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <div class="card h-100 shadow-sm rounded-lg">
+                    <div class="position-relative">
+                        <img src="@Url.Content("~/images/" + (string.IsNullOrEmpty(product.ImageUrl) ? "placeholder.jpg" : product.ImageUrl))" 
+                             class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
+                        <span class="position-absolute top-0 end-0 bg-@(product.Stock > 0 ? "success" : "danger") text-white px-2 py-1 m-2 rounded-pill small">
+                        @(product.Stock > 0 ? "Available" : "Not Available")
+                        </span>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3">
+                            <h5 class="card-title fw-bold">@product.Name</h5>
+                            <p class="card-text text-muted">@product.Description</p>
+                        </div>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="h5 text-primary fw-bold mb-0">@product.Price.ToString("C")</span>
+                            </div>
+                        @if (product.Stock > 0)
+                        {
+                                    <form asp-action="AddItem" asp-controller="Order" method="post" class="d-flex align-items-center gap-2">
+                                        <input type="hidden" name="prodId" value="@product.ProductId" />
+                                        <div class="input-group input-group-sm" style="width: 130px;">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity(this)">-</button>
+                                            <input type="number" min="1" max="@product.Stock" name="prodQty" value="1" 
+                                                   class="form-control text-center" style="width: 60px;" readonly>
+                                            <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity(this)">+</button>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-plus-lg"></i> Add
+                                        </button>
+                                    </form>
+                        }
+                        else
+                        {
+                                    <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                        Not Available
+                                    </button>
+                        }
+                        </div>
+                    </div>
+                </div>
+            </div>
+    }
+</div>
