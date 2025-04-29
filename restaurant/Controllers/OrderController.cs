@@ -42,10 +42,16 @@ namespace restaurant.Controllers
             return View(model);
         }
         [Authorize]
-
         [HttpPost]
         public async Task<IActionResult> AddItem(int prodId, int prodQty)
         {
+            // Check if the user is an admin
+            if (User.IsInRole("Admin"))
+            {
+                TempData["Error"] = "Admins cannot add items to the cart.";
+                return RedirectToAction("Create");
+            }
+
             var product = await _context.Products.FindAsync(prodId);
             if (product == null)
             {
@@ -88,7 +94,7 @@ namespace restaurant.Controllers
             HttpContext.Session.Set("OrderViewModel", model);
             return RedirectToAction("Create");
         }
-        
+
 
         [HttpGet]
         public async Task<IActionResult> Search(string searchName, int? categoryId, int? ingredientId)
@@ -239,6 +245,7 @@ namespace restaurant.Controllers
             });
             return View(userOrders);
         }
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CancelOrder(int orderId)
         {
@@ -248,9 +255,15 @@ namespace restaurant.Controllers
                 return NotFound();
             }
 
+            if (order.Status == OrderStatus.Completed)
+            {
+                TempData["Error"] = "Completed orders cannot be canceled.";
+                return RedirectToAction("ViewOrders");
+            }
+
             if (order.Status != OrderStatus.Pending)
             {
-                ModelState.AddModelError("", "Only pending orders can be canceled.");
+                TempData["Error"] = "Only pending orders can be canceled.";
                 return RedirectToAction("ViewOrders");
             }
 
@@ -266,7 +279,69 @@ namespace restaurant.Controllers
 
             order.Status = OrderStatus.Canceled;
             await _orders.UpdateAsync(order);
+            TempData["Success"] = "Order canceled successfully.";
             return RedirectToAction("ViewOrders");
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> ManageOrders()
+        {
+            var allOrders = await _orders.GetAllAsync();
+            return View(allOrders);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
+        {
+            var order = await _orders.GetByIdAsync(orderId, new QueryOptions<Order> { Includes = "OrderItems.Product" });
+            if (order == null)
+            {
+                TempData["Error"] = "Order not found.";
+                return RedirectToAction("ManageOrders");
+            }
+
+            if (!Enum.TryParse<OrderStatus>(status, out var newStatus))
+            {
+                TempData["Error"] = "Invalid status.";
+                return RedirectToAction("ManageOrders");
+            }
+
+            // If status is changing to Canceled, restore stock
+            if (newStatus == OrderStatus.Canceled && order.Status != OrderStatus.Canceled)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    var product = await _context.Products.FindAsync(item.ProductId);
+                    if (product != null)
+                    {
+                        product.Stock += item.Quantity;
+                        await _products.UpdateAsync(product);
+                    }
+                }
+            }
+            // If status is changing from Canceled to another status, deduct stock
+            else if (order.Status == OrderStatus.Canceled && newStatus != OrderStatus.Canceled)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    var product = await _context.Products.FindAsync(item.ProductId);
+                    if (product != null)
+                    {
+                        if (product.Stock < item.Quantity)
+                        {
+                            TempData["Error"] = $"Cannot update order status. Insufficient stock for {item.Product.Name}.";
+                            return RedirectToAction("ManageOrders");
+                        }
+                        product.Stock -= item.Quantity;
+                        await _products.UpdateAsync(product);
+                    }
+                }
+            }
+
+            order.Status = newStatus;
+            await _orders.UpdateAsync(order);
+            TempData["Success"] = "Order status updated successfully.";
+            return RedirectToAction("ManageOrders");
         }
     }
 }
