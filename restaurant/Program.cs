@@ -2,8 +2,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using restaurant.Data;
 using restaurant.Models;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+var cultureInfo = new CultureInfo("fr-TN");
+cultureInfo.NumberFormat.CurrencySymbol = "DT";
+
+// Appliquer globalement
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
