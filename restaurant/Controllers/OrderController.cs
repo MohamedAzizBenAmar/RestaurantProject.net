@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace restaurant.Controllers
 {
+
     public class OrderController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -234,7 +235,7 @@ namespace restaurant.Controllers
             HttpContext.Session.Remove("OrderViewModel");
             return RedirectToAction("ViewOrders");
         }
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> ViewOrders()
         {
